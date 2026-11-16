@@ -1,3 +1,4 @@
+
 import {
   Controller,
   Get,
@@ -6,12 +7,15 @@ import {
   Body,
   Param,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 
 import { CategoriesService } from './categories.service.js';
 
 import { CreateCategoryDto } from './dto/create-category.dto.js';
 import { UpdateCategoryDto } from './dto/update-category.dto.js';
+
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto.js';
 
 import { Roles } from '../common/decorators/roles.decorator.js';
 import { UserRole } from '../common/enums/user-role.enum.js';
@@ -29,8 +33,11 @@ export class CategoriesController {
   }
 
   @Get()
-  findAll() {
-    return this.categoriesService.findAll();
+  findAll(@Query() pagination: PaginationQueryDto) {
+    return this.categoriesService.findAll(
+      pagination.page,
+      pagination.limit,
+    );
   }
 
   @Get(':id')

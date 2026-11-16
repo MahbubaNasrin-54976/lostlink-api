@@ -58,13 +58,30 @@ export class CategoriesService {
     }
   }
 
-  async findAll() {
-    return this.categoryRepository.find({
+  
+async findAll(page: number, limit: number) {
+  const skip = (page - 1) * limit;
+
+  const [data, total] =
+    await this.categoryRepository.findAndCount({
       order: {
         createdAt: 'DESC',
       },
+      skip,
+      take: limit,
     });
-  }
+
+  return {
+    data,
+    meta: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+}
+
 
   async findOne(id: string) {
     const category = await this.categoryRepository.findOne({
