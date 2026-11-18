@@ -1,6 +1,0 @@
-export enum FraudFlagStatus {
-  OPEN = 'OPEN',
-  UNDER_REVIEW = 'UNDER_REVIEW',
-  CONFIRMED = 'CONFIRMED',
-  DISMISSED = 'DISMISSED',
-}

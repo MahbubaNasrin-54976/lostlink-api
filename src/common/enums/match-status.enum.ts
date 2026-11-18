@@ -1,7 +1,0 @@
-
-export enum MatchStatus {
-  SUGGESTED = 'SUGGESTED',
-  VIEWED = 'VIEWED',
-  CLAIMED = 'CLAIMED',
-  DISMISSED = 'DISMISSED',
-}

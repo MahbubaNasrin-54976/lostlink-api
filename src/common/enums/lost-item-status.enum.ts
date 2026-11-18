@@ -1,8 +1,0 @@
-
-export enum LostItemStatus {
-  OPEN = 'OPEN',
-  MATCHED = 'MATCHED',
-  CLAIM_PENDING = 'CLAIM_PENDING',
-  RESOLVED = 'RESOLVED',
-  CLOSED = 'CLOSED',
-}
