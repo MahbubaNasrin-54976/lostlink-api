@@ -3,7 +3,9 @@ import {
   NestModule,
   MiddlewareConsumer,
 } from '@nestjs/common';
-
+import { FoundItemsModule } from './modules/found-items/found-items.module.js';
+import { HandoversModule } from './modules/handovers/handovers.module.js';
+import { TransfersModule } from './modules/transfers/transfers.module.js';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -42,6 +44,9 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware.js';
     FraudFlagsModule,
     AuditLogsModule,
     MailModule,
+    FoundItemsModule,
+    HandoversModule,
+    TransfersModule,
   ],
 
   providers: [

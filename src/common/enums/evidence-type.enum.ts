@@ -1,0 +1,7 @@
+export enum EvidenceType {
+  PHOTO = 'PHOTO',
+  RECEIPT = 'RECEIPT',
+  SERIAL_NUMBER = 'SERIAL_NUMBER',
+  DESCRIPTION_NOTE = 'DESCRIPTION_NOTE',
+  OTHER = 'OTHER',
+}
