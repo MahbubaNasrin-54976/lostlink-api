@@ -1,4 +1,3 @@
-
 export enum MatchStatus {
   SUGGESTED = 'SUGGESTED',
   VIEWED = 'VIEWED',

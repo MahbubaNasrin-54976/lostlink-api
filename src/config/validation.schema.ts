@@ -10,8 +10,9 @@ export const validationSchema = Joi.object({
   DB_DATABASE: Joi.string().required(),
 
   JWT_SECRET: Joi.string().min(32).required(),
-  JWT_EXPIRES_IN: Joi.string().default('1d'),
-  MAIL_HOST: Joi.string().optional(),
+JWT_EXPIRES_IN: Joi.string().default('1d'),
+PRIVATE_ATTRIBUTE_SECRET: Joi.string().length(64).required(),
+MAIL_HOST: Joi.string().optional(),
 MAIL_PORT: Joi.number().default(587),
 MAIL_USER: Joi.string().optional(),
 MAIL_PASSWORD: Joi.string().optional(),

@@ -6,6 +6,9 @@ import {
 import { FoundItemsModule } from './modules/found-items/found-items.module.js';
 import { HandoversModule } from './modules/handovers/handovers.module.js';
 import { TransfersModule } from './modules/transfers/transfers.module.js';
+import { LostItemsModule } from './lost-items/lost-items.module.js';
+import { MatchesModule } from './matches/matches.module.js';
+import { ClaimsModule } from './claims/claims.module.js';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -47,6 +50,9 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware.js';
     FoundItemsModule,
     HandoversModule,
     TransfersModule,
+    LostItemsModule,
+    MatchesModule,
+    ClaimsModule,
   ],
 
   providers: [

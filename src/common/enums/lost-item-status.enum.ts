@@ -1,4 +1,3 @@
-
 export enum LostItemStatus {
   OPEN = 'OPEN',
   MATCHED = 'MATCHED',

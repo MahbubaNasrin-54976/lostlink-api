@@ -5,7 +5,10 @@ import {
   IsDateString,
   IsArray,
   ValidateNested,
+  ArrayMinSize,
+  ArrayMaxSize,
 } from 'class-validator';
+import { CreatePrivateAttributeDto } from './create-private-attribute.dto.js';
 import { Type } from 'class-transformer';
 import { CreateEvidenceDto } from './create-evidence.dto.js';
 
@@ -38,4 +41,11 @@ export class CreateFoundItemDto {
   @ValidateNested({ each: true })
   @Type(() => CreateEvidenceDto)
   evidence?: CreateEvidenceDto[];
+
+    @IsArray()
+  @ArrayMinSize(2)
+  @ArrayMaxSize(2)
+  @ValidateNested({ each: true })
+  @Type(() => CreatePrivateAttributeDto)
+  privateAttributes: CreatePrivateAttributeDto[];
 }

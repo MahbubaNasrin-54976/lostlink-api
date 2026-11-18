@@ -1,4 +1,3 @@
-
 export enum ClaimStatus {
   SUBMITTED = 'SUBMITTED',
   VERIFICATION_PENDING = 'VERIFICATION_PENDING',
@@ -7,4 +6,12 @@ export enum ClaimStatus {
   REJECTED = 'REJECTED',
   CANCELLED = 'CANCELLED',
   COMPLETED = 'COMPLETED',
+}
+
+export enum VerificationStatus {
+  NOT_STARTED = 'NOT_STARTED',
+  PENDING = 'PENDING',
+  PASSED = 'PASSED',
+  FAILED = 'FAILED',
+  MANUAL_REVIEW = 'MANUAL_REVIEW',
 }
