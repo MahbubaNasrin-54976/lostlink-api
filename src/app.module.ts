@@ -1,21 +1,38 @@
 import { Module } from '@nestjs/common';
-import { createObserveModule } from '@nestjs/observe';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller.js';
-import { AppService } from './app.service.js';
-
-export const { ObserveModule, ObserveInstrument } = createObserveModule();
+import { LostItemsModule } from './lost-items/lost-items.module.js';
+import { MatchesModule } from './matches/matches.module.js';
+import { ClaimsModule } from './claims/claims.module.js';
 
 @Module({
   imports: [
-    // Distributed tracing, auto-correlated logs, request/job metrics, error
-    // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com
-    ObserveModule.forRoot({
-      appKey: 'YOUR_APP_KEY',
-      appSecret: 'YOUR_APP_SECRET',
-      serviceId: 'lostlink-passenger',
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
     }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('DB_HOST', 'localhost'),
+        port: Number(configService.get<string>('DB_PORT', '5432')),
+        username: configService.get<string>('DB_USERNAME', 'postgres'),
+        password: configService.get<string>('DB_PASSWORD', '1234'),
+        database: configService.get<string>(
+          'DB_DATABASE',
+          'lostlink_passenger_db',
+        ),
+        autoLoadEntities: true,
+        synchronize: true, // Automatically creates your 4 tables in PostgreSQL!
+        logging: true,
+      }),
+    }),
+    LostItemsModule,
+    MatchesModule,
+    ClaimsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
