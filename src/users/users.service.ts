@@ -3,7 +3,6 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,6 +13,8 @@ import { User } from './entities/user.entity.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 
+import { UserRole } from '../common/enums/user-role.enum.js';
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -21,8 +22,8 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  // Create User
-    async create(createUserDto: CreateUserDto) {
+  // Admin creates Staff account
+  async create(createUserDto: CreateUserDto) {
     const { email, phone, password, ...otherData } = createUserDto;
 
     const normalizedEmail = email.trim().toLowerCase();
@@ -48,12 +49,12 @@ export class UsersService {
       email: normalizedEmail,
       phone: normalizedPhone,
       passwordHash,
+      role: UserRole.STAFF,
     });
 
     try {
       const savedUser = await this.userRepository.save(user);
 
-      // Never return passwordHash
       return {
         id: savedUser.id,
         fullName: savedUser.fullName,
@@ -78,7 +79,8 @@ export class UsersService {
       throw error;
     }
   }
-  // Get All Users
+
+  // Admin: Get all users
   async findAll() {
     return this.userRepository.find({
       order: {
@@ -87,7 +89,19 @@ export class UsersService {
     });
   }
 
-  // Get Single User
+  // Admin and Staff: Get Passenger list only
+  async findPassengers() {
+    return this.userRepository.find({
+      where: {
+        role: UserRole.PASSENGER,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
+  // Get single user
   async findOne(id: string) {
     const user = await this.userRepository.findOne({
       where: { id },
@@ -101,11 +115,12 @@ export class UsersService {
   }
 
   // Update User
-   async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.findOne(id);
 
     if (updateUserDto.email) {
-      updateUserDto.email = updateUserDto.email.trim().toLowerCase();
+      updateUserDto.email =
+        updateUserDto.email.trim().toLowerCase();
     }
 
     if (updateUserDto.phone) {
