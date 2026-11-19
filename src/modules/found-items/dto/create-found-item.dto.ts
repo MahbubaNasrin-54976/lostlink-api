@@ -1,13 +1,16 @@
+
 import {
   IsString,
   IsNotEmpty,
   IsOptional,
   IsDateString,
   IsArray,
+  IsUUID,
   ValidateNested,
   ArrayMinSize,
   ArrayMaxSize,
 } from 'class-validator';
+
 import { CreatePrivateAttributeDto } from './create-private-attribute.dto.js';
 import { Type } from 'class-transformer';
 import { CreateEvidenceDto } from './create-evidence.dto.js';
@@ -21,9 +24,9 @@ export class CreateFoundItemDto {
   @IsString()
   description?: string;
 
-  @IsString()
+  @IsUUID()
   @IsNotEmpty()
-  category: string;
+  categoryId: string;
 
   @IsString()
   @IsNotEmpty()
@@ -42,7 +45,7 @@ export class CreateFoundItemDto {
   @Type(() => CreateEvidenceDto)
   evidence?: CreateEvidenceDto[];
 
-    @IsArray()
+  @IsArray()
   @ArrayMinSize(2)
   @ArrayMaxSize(2)
   @ValidateNested({ each: true })

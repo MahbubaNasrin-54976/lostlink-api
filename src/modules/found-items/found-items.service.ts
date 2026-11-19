@@ -10,9 +10,13 @@ import { Repository, DataSource } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { createHmac } from 'crypto';
 
-import { FoundItemEntity } from './entities/found-item.entity.js';
-import { FoundItemPrivateAttribute } from './entities/found-item-private-attribute.entity.js';
+import {
+  FoundItemEntity,
+  FoundItemEvidenceEntity,
+} from './entities/found-item.entity.js';
 
+import { FoundItemPrivateAttribute } from './entities/found-item-private-attribute.entity.js';
+import { ItemCategory } from '../../categories/entities/item-category.entity.js';
 import { CreateFoundItemDto } from './dto/create-found-item.dto.js';
 import { UpdateFoundItemDto } from './dto/update-found-item.dto.js';
 
@@ -52,7 +56,12 @@ export class FoundItemsService {
     createDto: CreateFoundItemDto,
     staffId: string,
   ): Promise<FoundItemEntity> {
-    const { privateAttributes, evidence, ...itemData } = createDto;
+    const {
+      privateAttributes,
+      evidence,
+      categoryId,
+      ...itemData
+    } = createDto;
 
     if (
       !privateAttributes ||
@@ -67,46 +76,79 @@ export class FoundItemsService {
       );
     }
 
-    return this.dataSource.transaction(async (manager) => {
-      const itemRepository = manager.getRepository(FoundItemEntity);
-      const attributeRepository = manager.getRepository(
-        FoundItemPrivateAttribute,
-      );
+    return this.dataSource.transaction<FoundItemEntity>(
+      async (manager): Promise<FoundItemEntity> => {
+        const itemRepository = manager.getRepository(FoundItemEntity);
+        const categoryRepository = manager.getRepository(ItemCategory);
+        const evidenceRepository = manager.getRepository(
+          FoundItemEvidenceEntity,
+        );
+        const attributeRepository = manager.getRepository(
+          FoundItemPrivateAttribute,
+        );
 
-      const newItem = itemRepository.create({
-        ...itemData,
-        foundAt: new Date(createDto.foundAt),
-        registeredByStaffId: staffId,
-        evidence: evidence ?? [],
-      });
+        const category = await categoryRepository.findOne({
+          where: { id: categoryId },
+        });
 
-      const savedItem = await itemRepository.save(newItem);
+        if (!category) {
+          throw new NotFoundException(
+            `Category with ID ${categoryId} not found`,
+          );
+        }
 
-      const attributes = privateAttributes.map((attribute) =>
-        attributeRepository.create({
-          foundItemId: savedItem.id,
-          questionNumber: attribute.questionNumber,
-          question: attribute.question.trim(),
-          answerHash: this.hashAnswer(attribute.answer),
-        }),
-      );
+        const evidenceEntities = (evidence ?? []).map((item) =>
+          evidenceRepository.create({
+            type: item.type,
+            fileUrl: item.fileUrl,
+            notes: item.notes,
+          }),
+        );
 
-      await attributeRepository.save(attributes);
+        const newItem = itemRepository.create({
+          ...itemData,
+          categoryId,
+          foundAt: new Date(createDto.foundAt),
+          registeredByStaffId: staffId,
+          evidence: evidenceEntities,
+        });
 
-      return savedItem;
-    });
+        const savedItem = await itemRepository.save(newItem);
+
+        const attributes = privateAttributes.map((attribute) =>
+          attributeRepository.create({
+            foundItemId: savedItem.id,
+            questionNumber: attribute.questionNumber,
+            question: attribute.question.trim(),
+            answerHash: this.hashAnswer(attribute.answer),
+          }),
+        );
+
+        await attributeRepository.save(attributes);
+
+        return savedItem;
+      },
+    );
   }
 
   async findAll(): Promise<FoundItemEntity[]> {
     return await this.foundItemRepository.find({
-      relations: { evidence: true },
+      relations: {
+        evidence: true,
+        category: true,
+        registeredByStaff: true,
+      },
     });
   }
 
   async findOne(id: string): Promise<FoundItemEntity> {
     const item = await this.foundItemRepository.findOne({
       where: { id },
-      relations: { evidence: true },
+      relations: {
+        evidence: true,
+        category: true,
+        registeredByStaff: true,
+      },
     });
 
     if (!item) {
@@ -123,6 +165,20 @@ export class FoundItemsService {
     updateDto: UpdateFoundItemDto,
   ): Promise<FoundItemEntity> {
     const item = await this.findOne(id);
+
+    if (updateDto.categoryId) {
+      const category = await this.dataSource
+        .getRepository(ItemCategory)
+        .findOne({
+          where: { id: updateDto.categoryId },
+        });
+
+      if (!category) {
+        throw new NotFoundException(
+          `Category with ID ${updateDto.categoryId} not found`,
+        );
+      }
+    }
 
     if (updateDto.foundAt) {
       updateDto.foundAt = new Date(updateDto.foundAt) as any;

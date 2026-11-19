@@ -1,3 +1,4 @@
+
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,7 +7,10 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+
 import { OwnershipClaim } from './ownership-claim.entity.js';
+
+import { FoundItemPrivateAttribute } from '../../modules/found-items/entities/found-item-private-attribute.entity.js';
 
 @Entity('claim_verifications')
 export class ClaimVerification {
@@ -20,8 +24,16 @@ export class ClaimVerification {
   @JoinColumn({ name: 'claim_id', referencedColumnName: 'id' })
   claim: OwnershipClaim;
 
+  // Private attribute relationship
   @Column({ name: 'private_attribute_id', type: 'uuid' })
   privateAttributeId: string;
+
+  @ManyToOne(() => FoundItemPrivateAttribute, { nullable: false })
+  @JoinColumn({
+    name: 'private_attribute_id',
+    referencedColumnName: 'id',
+  })
+  privateAttribute: FoundItemPrivateAttribute;
 
   @Column({ name: 'is_correct', type: 'boolean' })
   isCorrect: boolean;

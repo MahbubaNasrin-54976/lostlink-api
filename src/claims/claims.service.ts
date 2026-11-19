@@ -632,35 +632,28 @@ export class ClaimsService {
       claim.reviewNote = reviewDto.reviewNote ?? null;
 
       const updatedClaim = await claimRepository.save(claim);
+if (reviewDto.claimStatus === ClaimStatus.APPROVED) {
+  // Keep the lost item in CLAIM_PENDING.
+  // It will become RESOLVED only after successful handover.
 
-      if (reviewDto.claimStatus === ClaimStatus.APPROVED) {
-        lostItem.status = LostItemStatus.RESOLVED;
-        await lostItemRepository.save(lostItem);
-
-        await matchRepository
-          .createQueryBuilder()
-          .update(ItemMatch)
-          .set({ status: MatchStatus.DISMISSED })
-          .where('lostItemId = :lostItemId', {
-            lostItemId: lostItem.id,
-          })
-          .andWhere('id != :matchId', {
-            matchId: matchPreview.id,
-          })
-          .andWhere('status IN (:...statuses)', {
-            statuses: [
-              MatchStatus.SUGGESTED,
-              MatchStatus.VIEWED,
-            ],
-          })
-          .setParameters({
-            statuses: [
-              MatchStatus.SUGGESTED,
-              MatchStatus.VIEWED,
-            ],
-          })
-          .execute();
-      } else {
+  await matchRepository
+    .createQueryBuilder()
+    .update(ItemMatch)
+    .set({ status: MatchStatus.DISMISSED })
+    .where('lostItemId = :lostItemId', {
+      lostItemId: lostItem.id,
+    })
+    .andWhere('id != :matchId', {
+      matchId: matchPreview.id,
+    })
+    .andWhere('status IN (:...statuses)', {
+      statuses: [
+        MatchStatus.SUGGESTED,
+        MatchStatus.VIEWED,
+      ],
+    })
+    .execute();
+} else {
         const otherActiveClaimsForMatch = await claimRepository.count({
           where: {
             matchId: matchPreview.id,

@@ -1,3 +1,4 @@
+
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,7 +8,10 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+
 import { ItemMatch } from '../../matches/entities/item-match.entity.js';
+import { User } from '../../users/entities/user.entity.js';
+
 import {
   ClaimStatus,
   VerificationStatus,
@@ -25,8 +29,13 @@ export class OwnershipClaim {
   @JoinColumn({ name: 'match_id', referencedColumnName: 'id' })
   match: ItemMatch;
 
+  // Passenger relationship
   @Column({ name: 'passenger_id', type: 'uuid' })
   passengerId: string;
+
+  @ManyToOne(() => User, { nullable: false })
+  @JoinColumn({ name: 'passenger_id', referencedColumnName: 'id' })
+  passenger: User;
 
   @Column({
     name: 'claim_status',
@@ -56,8 +65,16 @@ export class OwnershipClaim {
   })
   submittedAt: Date;
 
+  // Admin relationship
   @Column({ name: 'reviewed_by_admin_id', type: 'uuid', nullable: true })
   reviewedByAdminId: string | null;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({
+    name: 'reviewed_by_admin_id',
+    referencedColumnName: 'id',
+  })
+  reviewedByAdmin: User | null;
 
   @Column({ name: 'reviewed_at', type: 'timestamptz', nullable: true })
   reviewedAt: Date | null;

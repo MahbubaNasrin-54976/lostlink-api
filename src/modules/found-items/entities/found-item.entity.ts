@@ -14,6 +14,9 @@ import { FoundItemStatus } from '../../../common/enums/found-item-status.enum.js
 import { EvidenceType } from '../../../common/enums/evidence-type.enum.js';
 import { FoundItemPrivateAttribute } from './found-item-private-attribute.entity.js';
 
+import { ItemCategory } from '../../../categories/entities/item-category.entity.js';
+import { User } from '../../../users/entities/user.entity.js';
+
 @Entity('found_items')
 export class FoundItemEntity extends AppBaseEntity {
   @Column({ type: 'varchar', length: 150 })
@@ -22,8 +25,13 @@ export class FoundItemEntity extends AppBaseEntity {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column({ type: 'varchar', length: 100 })
-  category: string;
+  // Category Relationship
+  @Column({ type: 'uuid', name: 'category_id' })
+  categoryId: string;
+
+  @ManyToOne(() => ItemCategory, { nullable: false })
+  @JoinColumn({ name: 'category_id' })
+  category: Relation<ItemCategory>;
 
   @Column({ type: 'varchar', length: 100, name: 'found_location' })
   foundLocation: string;
@@ -49,8 +57,13 @@ export class FoundItemEntity extends AppBaseEntity {
   })
   storageLocation: string;
 
+  // Staff Relationship
   @Column({ type: 'uuid', name: 'registered_by_staff_id' })
   registeredByStaffId: string;
+
+  @ManyToOne(() => User, { nullable: false })
+  @JoinColumn({ name: 'registered_by_staff_id' })
+  registeredByStaff: Relation<User>;
 
   @OneToMany(
     () => FoundItemEvidenceEntity,
